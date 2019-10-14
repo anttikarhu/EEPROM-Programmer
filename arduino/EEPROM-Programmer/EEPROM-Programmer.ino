@@ -98,19 +98,26 @@ void version() {
 void write(String command) {
   busyWriting = true;
 
-  totalWritten = 0;
   dataChunkSize = getParamValue(command, "dataChunkSize").toInt();
-  startAddr = getParamValue(command, "startAddr").toInt();
-  currentWriteAddr = startAddr;
-  totalSize = getParamValue(command, "totalSize").toInt();
-
-  if (dataChunkSize > 0 && startAddr >= 0 && totalSize > 0) {
-    Serial.println("/waiting data");
-    startWrite();
-  } else {
-    invalidParameter("dataChunkSize, startAddr and totalSize as positive integer expected");
-    busyWriting = false;
+  if (dataChunkSize <= 0) {
+    dataChunkSize = 0x2000;
   }
+
+  startAddr = getParamValue(command, "startAddr").toInt();
+  if (startAddr < 0) {
+    startAddr = 0;
+  }
+
+  totalSize = getParamValue(command, "totalSize").toInt();
+  if (totalSize <= 0) {
+    totalSize = 0x2000;
+  }
+
+  totalWritten = 0;
+  currentWriteAddr = startAddr;
+
+  Serial.println("/waiting data");
+  startWrite();
 }
 
 void data(String command) {
