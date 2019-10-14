@@ -16,13 +16,16 @@
 #define COMMAND_INDICATOR_SPEED 33
 #define ERROR_INDICATOR_SPEED   200
 
+// For now this will do for configuration
+#define ROM_MAX_SIZE 0x2000
+
 #define COMMANDS "commands: /hello, /version, /write, /data, /erase, /zero, /read, /status"
 
 boolean busyWriting = false;
-int totalWritten = 0;
 int dataChunkSize = 0;
 int startAddr = 0;
 int totalSize = 0;
+int totalWritten = 0;
 int currentWriteAddr = 0;
 
 void setup() {
@@ -100,7 +103,7 @@ void write(String command) {
 
   dataChunkSize = getParamValue(command, "dataChunkSize").toInt();
   if (dataChunkSize <= 0) {
-    dataChunkSize = 0x2000;
+    dataChunkSize = ROM_MAX_SIZE;
   }
 
   startAddr = getParamValue(command, "startAddr").toInt();
@@ -110,7 +113,7 @@ void write(String command) {
 
   totalSize = getParamValue(command, "totalSize").toInt();
   if (totalSize <= 0) {
-    totalSize = 0x2000;
+    totalSize = ROM_MAX_SIZE;
   }
 
   totalWritten = 0;
@@ -165,15 +168,15 @@ void data(String command) {
     Serial.print("/done ");
     Serial.println(totalWritten);
   } else {
-    invalidParameter("data chunk expected with length as specified in write command");
     busyWriting = false;
+    invalidParameter("data chunk expected with length as specified in write command");
   }
 }
 
 void erase() {
   startWrite();
 
-  for (int address = 0; address <= 0x2000; address++) {
+  for (int address = 0; address <= ROM_MAX_SIZE; address++) {
     writeByte(address, 0xFF);
 
     if (address % 64 == 0) {
@@ -188,7 +191,7 @@ void erase() {
 void zero() {
   startWrite();
 
-  for (int address = 0; address <= 0x2000; address++) {
+  for (int address = 0; address <= ROM_MAX_SIZE; address++) {
     writeByte(address, 0x00);
 
     if (address % 64 == 0) {
@@ -201,7 +204,7 @@ void zero() {
 }
 
 void read() {
-  for (int a = 0; a < 0x2000; a += 16) {
+  for (int a = 0; a < ROM_MAX_SIZE; a += 16) {
     byte chunk[16];
     for (int i = 0; i < 16; i++) {
       chunk[i] = readByte(a + i);
