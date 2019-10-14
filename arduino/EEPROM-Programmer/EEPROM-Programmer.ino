@@ -67,8 +67,6 @@ void loop() {
           read();
         } else if (line.startsWith("/status")) {
           status();
-        } else if (line.startsWith("/testFill")) {
-          testFill();
         } else {
           unknownCommand(line);
         }
@@ -218,14 +216,6 @@ void status() {
   } else {
     Serial.println("idle");
   }
-}
-
-void testFill() {
-  startWrite();
-  for (int i = 0; i < 256; i++) {
-    writeByte(i, i);
-  }
-  Serial.println("/done");
 }
 
 void unknownCommand(String command) {
