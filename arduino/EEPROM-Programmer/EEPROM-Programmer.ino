@@ -16,17 +16,9 @@
 #define COMMAND_INDICATOR_SPEED 33
 #define ERROR_INDICATOR_SPEED   200
 
-#define COMMAND_NONE    -1
-#define COMMAND_HELLO   0
-#define COMMAND_VERSION 1
-#define COMMAND_WRITE   2
-#define COMMAND_DATA    3
-#define COMMAND_ERASE   4
-#define COMMAND_ZERO    5
-#define COMMAND_READ    6
 #define COMMANDS "commands: /hello, /version, /write, /data, /erase, /zero, /read, /status"
 
-int currentCommand = COMMAND_NONE;
+boolean busyWriting = false;
 int totalWritten = 0;
 int dataChunkSize = 0;
 int startAddr = 0;
@@ -58,7 +50,7 @@ void loop() {
     if (line.startsWith("/")) {
       setLed(HIGH);
 
-      if (currentCommand == COMMAND_NONE) {
+      if (!busyWriting) {
         if (line.equals("/hello")) {
           hello();
         } else if (line.equals("/version")) {
@@ -80,7 +72,7 @@ void loop() {
         } else {
           unknownCommand(line);
         }
-      } else if (currentCommand == COMMAND_WRITE || currentCommand == COMMAND_DATA) {
+      } else {
         if (line.startsWith("/data")) {
           data(line);
         } else if (line.startsWith("/status")) {
@@ -98,19 +90,15 @@ void loop() {
 }
 
 void hello() {
-  currentCommand = COMMAND_HELLO;
   Serial.println("bonjour :)");
-  currentCommand = COMMAND_NONE;
 }
 
 void version() {
-  currentCommand = COMMAND_VERSION;
   Serial.println(PROTOCOL_VERSION);
-  currentCommand = COMMAND_NONE;
 }
 
 void write(String command) {
-  currentCommand = COMMAND_WRITE;
+  busyWriting = true;
 
   totalWritten = 0;
   dataChunkSize = getParamValue(command, "dataChunkSize").toInt();
@@ -123,12 +111,12 @@ void write(String command) {
     startWrite();
   } else {
     invalidParameter("dataChunkSize, startAddr and totalSize as positive integer expected");
-    currentCommand = COMMAND_NONE;
+    busyWriting = false;
   }
 }
 
 void data(String command) {
-  currentCommand = COMMAND_DATA;
+  busyWriting = true;
 
   String data = command.substring(command.indexOf(' ') + 1);
 
@@ -156,7 +144,7 @@ void data(String command) {
       totalWritten++;
       
       if (totalWritten >= totalSize) {
-        currentCommand = COMMAND_NONE;
+        busyWriting = false;
         Serial.print("/done ");
         Serial.println(totalWritten);
         return;
@@ -168,18 +156,16 @@ void data(String command) {
     Serial.print("/written ");
     Serial.println(totalWritten);
   } else if (currentWriteAddr - writeStart < dataChunkSize) {
-    currentCommand = COMMAND_NONE;
+    busyWriting = false;
     Serial.print("/done ");
     Serial.println(totalWritten);
   } else {
     invalidParameter("data chunk expected with length as specified in write command");
-    currentCommand = COMMAND_NONE;
+    busyWriting = false;
   }
 }
 
 void erase() {
-  currentCommand = COMMAND_ERASE;
-
   startWrite();
 
   for (int address = 0; address <= 0x2000; address++) {
@@ -192,11 +178,9 @@ void erase() {
   }
 
   Serial.println("/done");
-  currentCommand = COMMAND_NONE;
 }
 
 void zero() {
-  currentCommand = COMMAND_ZERO;
   startWrite();
 
   for (int address = 0; address <= 0x2000; address++) {
@@ -209,12 +193,9 @@ void zero() {
   }
 
   Serial.println("/done");
-  currentCommand = COMMAND_NONE;
 }
 
 void read() {
-  currentCommand = COMMAND_READ;
-
   for (int a = 0; a < 0x2000; a += 16) {
     byte chunk[16];
     for (int i = 0; i < 16; i++) {
@@ -229,15 +210,13 @@ void read() {
 
     Serial.println(buf);
   }
-
-  currentCommand = COMMAND_NONE;
 }
 
 void status() {
-  if (currentCommand == COMMAND_NONE) {
-    Serial.println("idle");
-  } else {
+  if (busyWriting) {
     Serial.println("busy");
+  } else {
+    Serial.println("idle");
   }
 }
 
