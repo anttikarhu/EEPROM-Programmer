@@ -31,6 +31,7 @@ int totalWritten = 0;
 int dataChunkSize = 0;
 int startAddr = 0;
 int totalSize = 0;
+int currentWriteAddr = 0;
 
 void setup() {
   Serial.begin(57600);
@@ -109,18 +110,17 @@ void version() {
 }
 
 void write(String command) {
-  Serial.println("/notImplemented write");
-  return;
-
   currentCommand = COMMAND_WRITE;
 
   totalWritten = 0;
   dataChunkSize = getParamValue(command, "dataChunkSize").toInt();
   startAddr = getParamValue(command, "startAddr").toInt();
+  currentWriteAddr = startAddr;
   totalSize = getParamValue(command, "totalSize").toInt();
 
   if (dataChunkSize > 0 && startAddr >= 0 && totalSize > 0) {
     Serial.println("/waiting data");
+    startWrite();
   } else {
     invalidParameter("dataChunkSize, startAddr and totalSize as positive integer expected");
     currentCommand = COMMAND_NONE;
@@ -128,24 +128,46 @@ void write(String command) {
 }
 
 void data(String command) {
-  Serial.println("/notImplemented data");
-  return;
-
   currentCommand = COMMAND_DATA;
 
   String data = command.substring(command.indexOf(' ') + 1);
-  // TODO use start address and total data size parameters
 
-  // TODO decide data format
-  // TODO actually write to EEPROM
+  char m = -1;
+  char l = -1;
+  int writeStart = currentWriteAddr;
 
-  // TODO Test code
-  if (data.length() == dataChunkSize) {
-    totalWritten += data.length();
+  for (int i = 0; i < data.length(); i++) {
+    char c = data.charAt(i);
+    if (isHexadecimalDigit(c)) {
+      if (m == -1) {
+        m = hexToByte(data.charAt(i));
+      } else {
+        l = hexToByte(data.charAt(i));
+      }
+    }
+
+    if (m != -1 && l != -1) {
+      byte b = 16 * m + l;
+      m = -1;
+      l = -1;
+
+      writeByte(currentWriteAddr, b);
+      currentWriteAddr++;
+      totalWritten++;
+      
+      if (totalWritten >= totalSize) {
+        currentCommand = COMMAND_NONE;
+        Serial.print("/done ");
+        Serial.println(totalWritten);
+        return;
+      }
+    }
+  }
+
+  if (currentWriteAddr - writeStart == dataChunkSize) {
     Serial.print("/written ");
     Serial.println(totalWritten);
-  } else if (data.length() > 0 && data.length() < dataChunkSize) {
-    totalWritten += data.length();
+  } else if (currentWriteAddr - writeStart < dataChunkSize) {
     currentCommand = COMMAND_NONE;
     Serial.print("/done ");
     Serial.println(totalWritten);
@@ -201,7 +223,7 @@ void read() {
 
     char buf[80];
 
-    sprintf(buf, "%04x:  %02x %02x %02x %02x %02x %02x %02x %02x   %02x %02x %02x %02x %02x %02x %02x %02x",
+    sprintf(buf, "%04X:  %02X %02X %02X %02X %02X %02X %02X %02X   %02X %02X %02X %02X %02X %02X %02X %02X",
             a, chunk[0], chunk[1], chunk[2], chunk[3], chunk[4], chunk[5], chunk[6], chunk[7],
             chunk[8], chunk[9], chunk[10], chunk[11], chunk[12], chunk[13], chunk[14], chunk[15]);
 
@@ -294,6 +316,18 @@ void startWrite() {
     pinMode(d, OUTPUT);
   }
   delay(100);
+}
+
+byte hexToByte(char hex) {
+  if (hex >= 48 && hex <= 57) {
+    return hex - 48;
+  } else if (hex >= 65 && hex <= 70) {
+    return hex - 55;
+  } else if (hex >= 97 && hex <= 102) {
+    return hex - 87;
+  } else {
+    return 0;
+  }
 }
 
 void writeByte(int address, byte value) {
