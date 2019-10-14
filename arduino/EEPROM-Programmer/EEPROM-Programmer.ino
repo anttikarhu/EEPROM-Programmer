@@ -128,9 +128,9 @@ void data(String command) {
     char c = data.charAt(i);
     if (isHexadecimalDigit(c)) {
       if (m == -1) {
-        m = hexToByte(data.charAt(i));
+        m = hexToByte(c);
       } else {
-        l = hexToByte(data.charAt(i));
+        l = hexToByte(c);
       }
     }
 
@@ -142,7 +142,7 @@ void data(String command) {
       writeByte(currentWriteAddr, b);
       currentWriteAddr++;
       totalWritten++;
-      
+
       if (totalWritten >= totalSize) {
         busyWriting = false;
         Serial.print("/done ");
