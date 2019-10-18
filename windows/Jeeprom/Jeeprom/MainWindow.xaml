@@ -1,0 +1,13 @@
+﻿<Window x:Class="Jeeprom.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Jeeprom"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="640" Width="480">
+    <Grid Margin="0,0,373.6,-487">
+        <Label x:Name="testLabel" Content="Please connect programmer" Margin="10,10,-368,0" VerticalAlignment="Top" RenderTransformOrigin="0.614,1.055" FontSize="24"/>
+
+    </Grid>
+</Window>

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29409.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jeeprom", "Jeeprom\Jeeprom.csproj", "{B70B1700-F959-4080-ABB2-A1A7F2D95D24}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B70B1700-F959-4080-ABB2-A1A7F2D95D24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B70B1700-F959-4080-ABB2-A1A7F2D95D24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B70B1700-F959-4080-ABB2-A1A7F2D95D24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B70B1700-F959-4080-ABB2-A1A7F2D95D24}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CFF01C47-EBC8-4323-BC37-5CBFE360C83E}
+	EndGlobalSection
+EndGlobal
