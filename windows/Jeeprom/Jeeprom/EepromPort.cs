@@ -2,9 +2,9 @@
 using System.IO.Ports;
 using System.Threading.Tasks;
 
-namespace Jeeprom.Connection
+namespace Jeeprom
 {
-    class EepromPortWatcher
+    class EepromPort
     {
         enum Status
         {
@@ -19,7 +19,8 @@ namespace Jeeprom.Connection
 
         private const string EXPECTED_HELLO_RESPONSE = "bonjour :)";
         private const string EXPECTED_VERSION = "0";
-        private const int SCAN_INTERVAL = 2;
+        private const int SCAN_INTERVAL = 500;
+        private const int CONNECTION_INTERVAL = 2;
         private const int HEARTBEAT_INTERVAL = 4;
 
         public event EventHandler FoundBoard;
@@ -49,7 +50,7 @@ namespace Jeeprom.Connection
 
                     for (int i = 0; i < 10; i++)
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(SCAN_INTERVAL));
+                        await Task.Delay(TimeSpan.FromSeconds(CONNECTION_INTERVAL));
                         if (port.IsOpen)
                         {
                             break;
@@ -72,8 +73,8 @@ namespace Jeeprom.Connection
                 }
                 else
                 {
-                    Console.WriteLine("No ports connected, retrying in {0} seconds", SCAN_INTERVAL);
-                    await Task.Delay(TimeSpan.FromSeconds(SCAN_INTERVAL));
+                    Console.WriteLine("No ports connected, retrying in {0} seconds", SCAN_INTERVAL/1000.0);
+                    await Task.Delay(TimeSpan.FromMilliseconds(SCAN_INTERVAL));
                     Scan();
                 }
             }
@@ -92,7 +93,7 @@ namespace Jeeprom.Connection
             }
 
             // Wait a second
-            await Task.Delay(TimeSpan.FromSeconds(SCAN_INTERVAL));
+            await Task.Delay(TimeSpan.FromSeconds(CONNECTION_INTERVAL));
 
             if (status == Status.SAYING_HELLO)
             {
