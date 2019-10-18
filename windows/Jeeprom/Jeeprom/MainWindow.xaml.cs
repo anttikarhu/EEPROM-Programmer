@@ -39,6 +39,9 @@ namespace Jeeprom
                 eraseButton.Visibility = Visibility.Visible;
                 zeroButton.Visibility = Visibility.Visible;
                 readButton.Visibility = Visibility.Visible;
+                eraseButton.IsEnabled = true;
+                zeroButton.IsEnabled = true;
+                readButton.IsEnabled = true;
             });
         }
 
@@ -53,6 +56,9 @@ namespace Jeeprom
                 progressBar.Visibility = Visibility.Hidden;
                 readButton.Visibility = Visibility.Hidden;
                 dataTextBox.Visibility = Visibility.Hidden;
+                dataTextBox.Text = "";
+                statusLabel.Visibility = Visibility.Hidden;
+                statusLabel.Content = "";
             });
         }
 

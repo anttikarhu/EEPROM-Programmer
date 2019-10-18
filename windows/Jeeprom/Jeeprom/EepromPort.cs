@@ -38,6 +38,12 @@ namespace Jeeprom
         private SerialPort port;
         private StringBuilder readBuffer = new StringBuilder();
 
+        public void Reset()
+        {
+            status = Status.NONE;
+            Scan();
+        }
+
         public async void Scan()
         {
             if (status == Status.NONE || status == Status.SCANNING_PORTS)
@@ -91,8 +97,6 @@ namespace Jeeprom
                 Console.WriteLine("Now now, status: " + status);
             }
         }
-
-
 
         public void Erase()
         {
@@ -163,15 +167,13 @@ namespace Jeeprom
                 else
                 {
                     Console.WriteLine("Cannot do heartbeat, no connection");
-                    status = Status.NONE;
-                    Scan();
+                    Reset();
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine("Heartbeat failed: " + e.Message);
-                status = Status.NONE;
-                Scan();
+                Reset();
             }
         }
 
@@ -203,7 +205,7 @@ namespace Jeeprom
             catch
             {
                 Console.WriteLine("Something went wrong");
-                Scan();
+                Reset();
             }
 
             if (status == Status.SAYING_HELLO)
@@ -259,6 +261,10 @@ namespace Jeeprom
                     int progress = Convert.ToInt32(data.Substring(data.IndexOf("/erased ") + "/erased ".Length));
                     Console.WriteLine("Erase progress: {0}", progress);
                     OnEraseProgress(new EraseProgressEventArgs(progress));
+                } else
+                {
+                    Console.WriteLine("Erase failed");
+                    Reset();
                 }
             }
             else if (status == Status.READING)
@@ -270,7 +276,7 @@ namespace Jeeprom
                     OnReadDone(new EventArgs());
                     readBuffer.Clear();
                 }
-                else
+                else if(data != null && data.Length > 4)
                 {
                     int progress = Convert.ToInt32(data.Substring(0, 4), 16);
                     Console.WriteLine("Read progress: {0}", progress);
@@ -283,6 +289,10 @@ namespace Jeeprom
                         OnReadProgress(new ReadProgressEventArgs(progress, readBuffer.ToString()));
                         readBuffer.Clear();
                     }
+                } else
+                {
+                    Console.WriteLine("Read failed");
+                    Reset();
                 }
             }
         }
