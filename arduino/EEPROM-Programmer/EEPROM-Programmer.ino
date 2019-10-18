@@ -218,6 +218,8 @@ void read() {
 
     Serial.println(buf);
   }
+
+  Serial.println("/done");
 }
 
 void status() {

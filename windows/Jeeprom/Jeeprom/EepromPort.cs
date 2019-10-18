@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Jeeprom
@@ -14,6 +15,8 @@ namespace Jeeprom
             GETTING_VERSION,
             FOUND_DEVICE,
             SENDING_HEARTBEAT,
+            ERASING,
+            READING,
             STOPPED
         }
 
@@ -25,10 +28,15 @@ namespace Jeeprom
 
         public event EventHandler FoundBoard;
         public event EventHandler LostBoard;
+        public event EventHandler<EraseProgressEventArgs> EraseProgress;
+        public event EventHandler EraseDone;
+        public event EventHandler<ReadProgressEventArgs> ReadProgress;
+        public event EventHandler ReadDone;
 
         private Status status = Status.NONE;
         private string[] portNames;
         private SerialPort port;
+        private StringBuilder readBuffer = new StringBuilder();
 
         public async void Scan()
         {
@@ -73,7 +81,7 @@ namespace Jeeprom
                 }
                 else
                 {
-                    Console.WriteLine("No ports connected, retrying in {0} seconds", SCAN_INTERVAL/1000.0);
+                    Console.WriteLine("No ports connected, retrying in {0} seconds", SCAN_INTERVAL / 1000.0);
                     await Task.Delay(TimeSpan.FromMilliseconds(SCAN_INTERVAL));
                     Scan();
                 }
@@ -82,6 +90,27 @@ namespace Jeeprom
             {
                 Console.WriteLine("Now now, status: " + status);
             }
+        }
+
+
+
+        public void Erase()
+        {
+            status = Status.ERASING;
+            port.WriteLine("/erase");
+        }
+
+        public void Zero()
+        {
+            status = Status.ERASING;
+            port.WriteLine("/zero");
+        }
+
+        internal void Read()
+        {
+            status = Status.READING;
+            readBuffer.Clear();
+            port.WriteLine("/read");
         }
 
         private async void SayHello()
@@ -103,7 +132,6 @@ namespace Jeeprom
 
         }
 
-
         private void GetVersion()
         {
             if (status == Status.SAYING_HELLO && port != null && port.IsOpen)
@@ -115,6 +143,14 @@ namespace Jeeprom
 
         private async void Heartbeat()
         {
+            if (status == Status.ERASING || status == Status.READING)
+            {
+                Console.WriteLine("Busy {0}, skipping heartbeat", status);
+                await Task.Delay(TimeSpan.FromSeconds(HEARTBEAT_INTERVAL));
+                Heartbeat();
+                return;
+            }
+
             try
             {
                 if (status == Status.FOUND_DEVICE && port != null && port.IsOpen)
@@ -203,12 +239,50 @@ namespace Jeeprom
                 if (EXPECTED_HELLO_RESPONSE.Equals(data))
                 {
                     Console.WriteLine("All is well");
-                    status = Status.FOUND_DEVICE;
                 }
                 else
                 {
                     Console.WriteLine("Wrong heartbeat response '{0}', stopping", data);
                     Stop();
+                }
+            }
+            else if (status == Status.ERASING)
+            {
+                if ("/done".Equals(data))
+                {
+                    Console.WriteLine("Erase done");
+                    status = Status.FOUND_DEVICE;
+                    OnEraseDone(new EventArgs());
+                }
+                else if (data.StartsWith("/erased "))
+                {
+                    int progress = Convert.ToInt32(data.Substring(data.IndexOf("/erased ") + "/erased ".Length));
+                    Console.WriteLine("Erase progress: {0}", progress);
+                    OnEraseProgress(new EraseProgressEventArgs(progress));
+                }
+            }
+            else if (status == Status.READING)
+            {
+                if ("/done".Equals(data))
+                {
+                    Console.WriteLine("Read done");
+                    status = Status.FOUND_DEVICE;
+                    OnReadDone(new EventArgs());
+                    readBuffer.Clear();
+                }
+                else
+                {
+                    int progress = Convert.ToInt32(data.Substring(0, 4), 16);
+                    Console.WriteLine("Read progress: {0}", progress);
+
+                    // Invoke event when 64 bytes of data have been read to give UI some slack
+                    readBuffer.Append(data);
+                    readBuffer.Append("\r");
+                    if ((progress + 16) % 64 == 0)
+                    {
+                        OnReadProgress(new ReadProgressEventArgs(progress, readBuffer.ToString()));
+                        readBuffer.Clear();
+                    }
                 }
             }
         }
@@ -232,6 +306,30 @@ namespace Jeeprom
         protected virtual void OnLostBoard(EventArgs e)
         {
             EventHandler eventHandler = LostBoard;
+            eventHandler?.Invoke(this, e);
+        }
+
+        protected virtual void OnEraseProgress(EraseProgressEventArgs e)
+        {
+            EventHandler<EraseProgressEventArgs> eventHandler = EraseProgress;
+            eventHandler?.Invoke(this, e);
+        }
+
+        protected virtual void OnEraseDone(EventArgs e)
+        {
+            EventHandler eventHandler = EraseDone;
+            eventHandler?.Invoke(this, e);
+        }
+
+        protected virtual void OnReadProgress(ReadProgressEventArgs e)
+        {
+            EventHandler<ReadProgressEventArgs> eventHandler = ReadProgress;
+            eventHandler?.Invoke(this, e);
+        }
+
+        protected virtual void OnReadDone(EventArgs e)
+        {
+            EventHandler eventHandler = ReadDone;
             eventHandler?.Invoke(this, e);
         }
     }
