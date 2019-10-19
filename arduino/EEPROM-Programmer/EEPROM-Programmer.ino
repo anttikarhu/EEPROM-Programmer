@@ -322,9 +322,9 @@ void writeByte(int address, byte value) {
   digitalWrite(WRITE_ENABLE, LOW);
   delayMicroseconds(1);
   digitalWrite(WRITE_ENABLE, HIGH);
-  if (address % 64 == 0) {
+  if ((address + 1) % 64 == 0) {
     // Not sure if paging works like this, but having a longer break after each page
-    delay(10);
+    delay(1);
   } else {
     delayMicroseconds(120);
   }
