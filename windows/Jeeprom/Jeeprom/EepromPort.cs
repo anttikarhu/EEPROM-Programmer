@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.IO.Ports;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,9 +15,9 @@ namespace Jeeprom
             SAYING_HELLO,
             GETTING_VERSION,
             FOUND_DEVICE,
-            SENDING_HEARTBEAT,
             ERASING,
             READING,
+            WRITING_FILE,
             STOPPED
         }
 
@@ -25,6 +26,7 @@ namespace Jeeprom
         private const int SCAN_INTERVAL = 500;
         private const int CONNECTION_INTERVAL = 2;
         private const int HEARTBEAT_INTERVAL = 4;
+        private const int WRITE_CHUNK_SIZE = 24;
 
         public event EventHandler FoundBoard;
         public event EventHandler LostBoard;
@@ -32,11 +34,14 @@ namespace Jeeprom
         public event EventHandler EraseDone;
         public event EventHandler<ReadProgressEventArgs> ReadProgress;
         public event EventHandler ReadDone;
+        public event EventHandler<WriteProgressEventArgs> WriteProgress;
+        public event EventHandler WriteDone;
 
         private Status status = Status.NONE;
         private string[] portNames;
         private SerialPort port;
         private StringBuilder readBuffer = new StringBuilder();
+        private FileStream writeFileStream = null;
 
         public void Reset()
         {
@@ -110,11 +115,18 @@ namespace Jeeprom
             port.WriteLine("/zero");
         }
 
-        internal void Read()
+        public void Read()
         {
             status = Status.READING;
             readBuffer.Clear();
             port.WriteLine("/read");
+        }
+
+        public void StartWrite(string fileName)
+        {
+            writeFileStream = File.OpenRead(fileName);
+            status = Status.WRITING_FILE;
+            port.WriteLine(String.Format("/write startAddr:0 dataChunkSize:{0} totalSize:8192", WRITE_CHUNK_SIZE));
         }
 
         private async void SayHello()
@@ -147,10 +159,11 @@ namespace Jeeprom
 
         private async void Heartbeat()
         {
-            if (status == Status.ERASING || status == Status.READING)
+            await Task.Delay(TimeSpan.FromSeconds(HEARTBEAT_INTERVAL));
+
+            if (status == Status.ERASING || status == Status.READING || status == Status.WRITING_FILE)
             {
                 Console.WriteLine("Busy {0}, skipping heartbeat", status);
-                await Task.Delay(TimeSpan.FromSeconds(HEARTBEAT_INTERVAL));
                 Heartbeat();
                 return;
             }
@@ -159,8 +172,6 @@ namespace Jeeprom
             {
                 if (status == Status.FOUND_DEVICE && port != null && port.IsOpen)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(HEARTBEAT_INTERVAL));
-                    //status = Status.SENDING_HEARTBEAT;
                     port.WriteLine("/hello");
                     Heartbeat();
                 }
@@ -261,7 +272,8 @@ namespace Jeeprom
                     int progress = Convert.ToInt32(data.Substring(data.IndexOf("/erased ") + "/erased ".Length));
                     Console.WriteLine("Erase progress: {0}", progress);
                     OnEraseProgress(new EraseProgressEventArgs(progress));
-                } else
+                }
+                else
                 {
                     Console.WriteLine("Erase failed");
                     Reset();
@@ -276,7 +288,7 @@ namespace Jeeprom
                     OnReadDone(new EventArgs());
                     readBuffer.Clear();
                 }
-                else if(data != null && data.Length > 4)
+                else if (data != null && data.Length > 4)
                 {
                     int progress = Convert.ToInt32(data.Substring(0, 4), 16);
                     Console.WriteLine("Read progress: {0}", progress);
@@ -289,12 +301,50 @@ namespace Jeeprom
                         OnReadProgress(new ReadProgressEventArgs(progress, readBuffer.ToString()));
                         readBuffer.Clear();
                     }
-                } else
+                }
+                else
                 {
                     Console.WriteLine("Read failed");
                     Reset();
                 }
             }
+            else if (status == Status.WRITING_FILE)
+            {
+                if (data.StartsWith("/waiting") || data.StartsWith("/written"))
+                {
+                    if (data.StartsWith("/written"))
+                    {
+                        int progress = Convert.ToInt32(data.Substring(data.IndexOf("/written ") + "/written ".Length));
+                        OnWriteProgress(new WriteProgressEventArgs(progress));
+                    }
+                    byte[] buffer = new byte[WRITE_CHUNK_SIZE];
+                    int size = writeFileStream.Read(buffer, 0, WRITE_CHUNK_SIZE);
+                    if (size > 0)
+                    {
+                        WriteData(buffer);
+                    }
+                    else
+                    {
+                        if (writeFileStream != null)
+                        {
+                            writeFileStream.Close();
+                        }
+                        OnWriteDone(new EventArgs());
+                    }
+                }
+                else if (data.StartsWith("/done"))
+                {
+                    writeFileStream.Close();
+                    writeFileStream = null;
+                    OnWriteDone(new EventArgs());
+                }
+            }
+        }
+
+        private void WriteData(byte[] data)
+        {
+            string hex = BitConverter.ToString(data).Replace("-", "");
+            port.WriteLine("/data " + hex);
         }
 
         private void Port_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
@@ -340,6 +390,18 @@ namespace Jeeprom
         protected virtual void OnReadDone(EventArgs e)
         {
             EventHandler eventHandler = ReadDone;
+            eventHandler?.Invoke(this, e);
+        }
+
+        protected virtual void OnWriteProgress(WriteProgressEventArgs e)
+        {
+            EventHandler<WriteProgressEventArgs> eventHandler = WriteProgress;
+            eventHandler?.Invoke(this, e);
+        }
+
+        protected virtual void OnWriteDone(EventArgs e)
+        {
+            EventHandler eventHandler = WriteDone;
             eventHandler?.Invoke(this, e);
         }
     }

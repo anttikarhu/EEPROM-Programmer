@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
+using System.IO;
 using System.Windows;
 
 namespace Jeeprom
@@ -22,6 +24,8 @@ namespace Jeeprom
             eepromPort.EraseDone += PortWatcher_EraseDone;
             eepromPort.ReadProgress += EepromPort_ReadProgress;
             eepromPort.ReadDone += EepromPort_ReadDone;
+            eepromPort.WriteProgress += EepromPort_WriteProgress;
+            eepromPort.WriteDone += EepromPort_WriteDone;
 
             eepromPort.Scan();
         }
@@ -116,9 +120,37 @@ namespace Jeeprom
 
         private void writeFileButton_Click(object sender, RoutedEventArgs e)
         {
-            progressBar.Visibility = Visibility.Visible;
-            disableControls();
-            statusLabel.Content = "Writing file contents...";
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string fileName = openFileDialog.FileName;
+                if (File.Exists(fileName))
+                {
+                    progressBar.Visibility = Visibility.Visible;
+                    disableControls();
+                    eepromPort.StartWrite(fileName);
+                    statusLabel.Content = "Writing file contents...";
+                }
+            }
+        }
+
+        private void EepromPort_WriteProgress(object sender, WriteProgressEventArgs e)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                progressBar.Value = e.Progress;
+            });
+        }
+
+        private void EepromPort_WriteDone(object sender, EventArgs e)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                progressBar.Visibility = Visibility.Hidden;
+                progressBar.Value = 0;
+                enableControls();
+                statusLabel.Content = "";
+            });
         }
 
         private void disableControls()
@@ -146,7 +178,6 @@ namespace Jeeprom
             writeFileButton.Visibility = Visibility.Hidden;
             dataTextBox.Visibility = Visibility.Hidden;
             dataTextBox.Text = "";
-            statusLabel.Visibility = Visibility.Hidden;
             statusLabel.Content = "";
         }
 

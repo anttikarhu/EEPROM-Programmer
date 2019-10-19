@@ -13,7 +13,7 @@
         <Button x:Name="zeroButton" Content="Zero" HorizontalAlignment="Left" Margin="90,57,0,0" VerticalAlignment="Top" Width="75" Click="zeroButton_Click"/>
         <Label x:Name="statusLabel" Content="" HorizontalAlignment="Left" Margin="10,96,0,0" VerticalAlignment="Top" Width="200"/>
         <Button x:Name="readButton" Content="Read" HorizontalAlignment="Left" Margin="170,57,0,0" VerticalAlignment="Top" Width="75" Click="readButton_Click"/>
-        <TextBox x:Name="dataTextBox" Margin="10,96,9.6,10.4" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="Global Monospace" />
+        <TextBox x:Name="dataTextBox" Margin="10,127,9.6,10.4" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" FontFamily="Global Monospace" />
         <Button x:Name="writeFileButton" Content="Write file" HorizontalAlignment="Left" Margin="250,57,0,0" VerticalAlignment="Top" Width="75" Click="writeFileButton_Click"/>
 
     </Grid>
