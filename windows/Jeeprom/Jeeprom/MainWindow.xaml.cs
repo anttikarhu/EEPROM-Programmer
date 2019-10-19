@@ -14,11 +14,7 @@ namespace Jeeprom
         {
             InitializeComponent();
 
-            eraseButton.Visibility = Visibility.Hidden;
-            zeroButton.Visibility = Visibility.Hidden;
-            progressBar.Visibility = Visibility.Hidden;
-            readButton.Visibility = Visibility.Hidden;
-            dataTextBox.Visibility = Visibility.Hidden;
+            hideControls();
 
             eepromPort.FoundBoard += PortWatcher_FoundBoard;
             eepromPort.LostBoard += PortWatcher_LostBoard;
@@ -36,12 +32,8 @@ namespace Jeeprom
             {
                 testLabel.Content = "Found programmer :)";
 
-                eraseButton.Visibility = Visibility.Visible;
-                zeroButton.Visibility = Visibility.Visible;
-                readButton.Visibility = Visibility.Visible;
-                eraseButton.IsEnabled = true;
-                zeroButton.IsEnabled = true;
-                readButton.IsEnabled = true;
+                showControls();
+                enableControls();
             });
         }
 
@@ -51,23 +43,14 @@ namespace Jeeprom
             {
                 testLabel.Content = "Please connect programmer";
 
-                eraseButton.Visibility = Visibility.Hidden;
-                zeroButton.Visibility = Visibility.Hidden;
-                progressBar.Visibility = Visibility.Hidden;
-                readButton.Visibility = Visibility.Hidden;
-                dataTextBox.Visibility = Visibility.Hidden;
-                dataTextBox.Text = "";
-                statusLabel.Visibility = Visibility.Hidden;
-                statusLabel.Content = "";
+                hideControls();
             });
         }
 
         private void eraseButton_Click(object sender, RoutedEventArgs e)
         {
             progressBar.Visibility = Visibility.Visible;
-            eraseButton.IsEnabled = false;
-            zeroButton.IsEnabled = false;
-            readButton.IsEnabled = false;
+            disableControls();
             statusLabel.Content = "Erasing (filling with 0xFF)...";
 
             eepromPort.Erase();
@@ -76,9 +59,7 @@ namespace Jeeprom
         private void zeroButton_Click(object sender, RoutedEventArgs e)
         {
             progressBar.Visibility = Visibility.Visible;
-            eraseButton.IsEnabled = false;
-            zeroButton.IsEnabled = false;
-            readButton.IsEnabled = false;
+            disableControls();
             statusLabel.Content = "Writing all zeros...";
 
             eepromPort.Zero();
@@ -97,9 +78,7 @@ namespace Jeeprom
             {
                 progressBar.Visibility = Visibility.Hidden;
                 progressBar.Value = 0;
-                eraseButton.IsEnabled = true;
-                zeroButton.IsEnabled = true;
-                readButton.IsEnabled = true;
+                enableControls();
                 statusLabel.Content = "";
             });
         }
@@ -109,9 +88,7 @@ namespace Jeeprom
             progressBar.Visibility = Visibility.Visible;
             dataTextBox.Text = "";
             dataTextBox.Visibility = Visibility.Visible;
-            eraseButton.IsEnabled = false;
-            zeroButton.IsEnabled = false;
-            readButton.IsEnabled = false;
+            disableControls();
             statusLabel.Content = "Reading contents...";
 
             eepromPort.Read();
@@ -132,11 +109,53 @@ namespace Jeeprom
             {
                 progressBar.Visibility = Visibility.Hidden;
                 progressBar.Value = 0;
-                eraseButton.IsEnabled = true;
-                zeroButton.IsEnabled = true;
-                readButton.IsEnabled = true;
+                enableControls();
                 statusLabel.Content = "";
             });
+        }
+
+        private void writeFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            progressBar.Visibility = Visibility.Visible;
+            disableControls();
+            statusLabel.Content = "Writing file contents...";
+        }
+
+        private void disableControls()
+        {
+            eraseButton.IsEnabled = false;
+            zeroButton.IsEnabled = false;
+            readButton.IsEnabled = false;
+            writeFileButton.IsEnabled = false;
+        }
+
+        private void enableControls()
+        {
+            eraseButton.IsEnabled = true;
+            zeroButton.IsEnabled = true;
+            readButton.IsEnabled = true;
+            writeFileButton.IsEnabled = true;
+        }
+
+        private void hideControls()
+        {
+            eraseButton.Visibility = Visibility.Hidden;
+            zeroButton.Visibility = Visibility.Hidden;
+            progressBar.Visibility = Visibility.Hidden;
+            readButton.Visibility = Visibility.Hidden;
+            writeFileButton.Visibility = Visibility.Hidden;
+            dataTextBox.Visibility = Visibility.Hidden;
+            dataTextBox.Text = "";
+            statusLabel.Visibility = Visibility.Hidden;
+            statusLabel.Content = "";
+        }
+
+        private void showControls()
+        {
+            eraseButton.Visibility = Visibility.Visible;
+            zeroButton.Visibility = Visibility.Visible;
+            readButton.Visibility = Visibility.Visible;
+            writeFileButton.Visibility = Visibility.Visible;
         }
     }
 }
