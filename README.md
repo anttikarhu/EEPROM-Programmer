@@ -12,6 +12,7 @@ There's no schematics of the hardware side of it. It follows almost exactly the 
 
 ## What's in the project
 ### Arduino EEPROM programmer
+#### Directory: arduino
 Designed on a cheap Arduino Nano clone from
 China, so I guess almost any Arduino with serial port will work :)
 The programmer currently assumes 28C64 eeprom, and a Ben-Eater-like
@@ -19,6 +20,7 @@ circuit. It accepts text command via serial, so one can test (or use)
 it manually.
 
 ### Windows C# app
+#### Directory: windows
 Simple client that can make the Arduino
 serial commands, and erase/zero, read and write
 data to EEPROM. Currently the serial communication
@@ -30,12 +32,14 @@ Data verification and per byte editing would be nice
 additions.
 
 ### PCB
+#### Directory: cartridgePcb
 I modified the https://github.com/SukkoPera/OpenC64Cart 
 PCB design by removing all I did not need for 8K roms.
 You can find a pic and gerber files.
 
 ### Test C64 Cartridge app
-I took one of my learning projects (C64-Multicolor-background),
+#### Directory: testCartridge
+I took one of my learning projects (C64-Multicolor-Background),
 and modified it to work from a cartridge. It's just
 copy-pasted between coldstart-warmstart and 8K padding
 sections, and needed no other modifications, luckily.
