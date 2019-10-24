@@ -40,6 +40,7 @@ You can find a pic and gerber files.
 ### Test C64 Cartridge app
 #### Directory: testCartridge
 I took one of my learning projects (C64-Multicolor-Background),
-and modified it to work from a cartridge. It's just
+and modified it to work from a cartridge. The code (without
+Basic loader) is just
 copy-pasted between coldstart-warmstart and 8K padding
 sections, and needed no other modifications, luckily.
