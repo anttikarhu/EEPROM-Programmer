@@ -7,7 +7,7 @@ The design principle is that one can control the Arduino fully via Serial text c
 
 Big thanks to Ben Eater and his eeprom-programmer (https://github.com/beneater/eeprom-programmer) we are familiar from the Ben Eater 8-bit computer series (check his Youtube channel for more info: https://www.youtube.com/channel/UCS0N5baNlQWJCUrhCEo8WlA). The Arduino code is heavily influenced by him.
 
-There's no schematics of the hardware side of it. It follows almost exactly the Ben Eater schematics available online. Only difference (Ben's using 28C16 EEPROM) is that I assume 3 74LS595 shift registers instead of 2, because that way one can achieve the 16 bit address line. Also the extra address lines must be connected to the EEPROM to thei proper pins.
+There's no schematics of the hardware side of it. It follows almost exactly the Ben Eater schematics available online. Only difference (Ben's using 28C16 EEPROM) is that I assume 3 74LS595 shift registers instead of 2, because that way one can achieve the 16 bit address line. 28C64 could have been programmed with only two of those ICs, but I wanted to have code ready for 32kB ROMs :) Also the extra address lines must be connected to the EEPROM to their proper pins.
 
 
 ## What's in the project
@@ -15,7 +15,7 @@ There's no schematics of the hardware side of it. It follows almost exactly the 
 #### Directory: arduino
 Designed on a cheap Arduino Nano clone from
 China, so I guess almost any Arduino with serial port will work :)
-The programmer currently assumes 28C64 eeprom, and a Ben-Eater-like
+The programmer currently assumes 28C64 EEPROM, and a Ben-Eater-like
 circuit. It accepts text command via serial, so one can test (or use) 
 it manually.
 
@@ -43,4 +43,4 @@ I took one of my learning projects (C64-Multicolor-Background),
 and modified it to work from a cartridge. The code (without
 Basic loader) is just
 copy-pasted between coldstart-warmstart and 8K padding
-sections, and needed no other modifications, luckily. I converted the compiled .prg file first to .crt, and then to .bin, using Vice's cartconv too. The .bin file goes to the EEPROM.
+sections, and needed no other modifications, luckily. I converted the compiled .prg file first to .crt, and then to .bin, using Vice's cartconv tool. The .bin file goes to the EEPROM.
