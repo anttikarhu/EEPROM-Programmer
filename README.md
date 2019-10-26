@@ -43,4 +43,4 @@ I took one of my learning projects (C64-Multicolor-Background),
 and modified it to work from a cartridge. The code (without
 Basic loader) is just
 copy-pasted between coldstart-warmstart and 8K padding
-sections, and needed no other modifications, luckily.
+sections, and needed no other modifications, luckily. I converted the compiled .prg file first to .crt, and then to .bin, using Vice's cartconv too. The .bin file goes to the EEPROM.
