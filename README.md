@@ -44,3 +44,16 @@ and modified it to work from a cartridge. The code (without
 Basic loader) is just
 copy-pasted between coldstart-warmstart and 8K padding
 sections, and needed no other modifications, luckily. I converted the compiled .prg file first to .crt, and then to .bin, using Vice's cartconv tool. The .bin file goes to the EEPROM.
+
+## What next?
+### 16kB ROMs & Cartridges
+I will add support for 16kB cartridges (by using 28C256 which is 32kB, but 28 series 16kB rom is apparently not available). Still, keeping the PCB simple, and not adding any configurations or excess parts - great PCBs of such kind exist already. An untested version of 16kB PCB is already included.
+
+### Data verify
+It would be cool to add verification after writing the data to ROM.
+
+### Per byte editing
+It would be cool to be able to edit the ROM contents after writing. Not sure how usable that would be, but cool.
+
+### Other improvements
+Sometimes first and/or last byte is not properly written, that could be investigated. It can be worked around by zeroing and erasing the ROM first, then writing. No idea yet why. Also flow control to serial communication would be nice, and be able to write whole pages (64 bytes for these 28Cxxx ROMs) at a time.
