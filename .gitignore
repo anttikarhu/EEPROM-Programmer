@@ -1,5 +1,7 @@
 .vs
 bin
 obj
+bak
 Jeeprom.csproj.user
 App.dmp
+*.tmp

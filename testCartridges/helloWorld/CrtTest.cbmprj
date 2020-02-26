@@ -35,7 +35,7 @@
         <RunPostBuildAlways>False</RunPostBuildAlways>
         <PreBuildCommands />
         <PostBuildCommands>
-            <PostBuildCommand>[DOSCMD]E:\Dropbox\c64\WinVICE-3.2-x86-r34842\cartconv.exe -t normal -i C:\Users\Antti\Documents\cbmstudio\CrtTest\CrtTest.prg -o C:\Users\Antti\Documents\cbmstudio\CrtTest\CrtTest.crt</PostBuildCommand>
+            <PostBuildCommand>[DOSCMD]C:\Users\anttikar\Dropbox\c64\WinVICE-3.2-x86-r34842\cartconv.exe -t normal -i C:\Users\anttikar\Documents\src\anttikarhu\EEPROM-Programmer\testCartridges\helloWorld\CrtTest.prg -o C:\Users\anttikar\Documents\src\anttikarhu\EEPROM-Programmer\testCartridges\helloWorld\CrtTest.crt</PostBuildCommand>
         </PostBuildCommands>
     </BuildEvents>
     <BuildList>
