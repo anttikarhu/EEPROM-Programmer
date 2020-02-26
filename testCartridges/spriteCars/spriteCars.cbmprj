@@ -4,7 +4,7 @@
 <!-- Project Target : C64 -->
 <Project>
     <Target>2</Target>
-    <Executable>CrtTest.prg</Executable>
+    <Executable>spriteCars.prg</Executable>
     <StartAddress>2049</StartAddress>
     <FilesGlobal>False</FilesGlobal>
     <BatchMode>False</BatchMode>
@@ -14,7 +14,7 @@
     <d64Name />
     <Comments />
     <Author />
-    <AutoLaunchName>CrtTest.prg</AutoLaunchName>
+    <AutoLaunchName>spriteCars.prg</AutoLaunchName>
     <NoSingleFileBuild>False</NoSingleFileBuild>
     <Cartridge>
         <CrtBuildingCartridge>False</CrtBuildingCartridge>
@@ -35,8 +35,8 @@
         <RunPostBuildAlways>False</RunPostBuildAlways>
         <PreBuildCommands />
         <PostBuildCommands>
-            <PostBuildCommand>[DOSCMD]C:\Users\anttikar\Dropbox\c64\WinVICE-3.2-x86-r34842\cartconv.exe -t normal -i C:\Users\anttikar\Documents\src\anttikarhu\EEPROM-Programmer\testCartridges\helloWorld\CrtTest.prg -o C:\Users\anttikar\Documents\src\anttikarhu\EEPROM-Programmer\testCartridges\helloWorld\CrtTest.crt</PostBuildCommand>
-            <PostBuildCommand>[DOSCMD]C:\Users\anttikar\Dropbox\c64\WinVICE-3.2-x86-r34842\cartconv.exe -i C:\Users\anttikar\Documents\src\anttikarhu\EEPROM-Programmer\testCartridges\helloWorld\CrtTest.crt -o C:\Users\anttikar\Documents\src\anttikarhu\EEPROM-Programmer\testCartridges\helloWorld\CrtTest.bin</PostBuildCommand>
+            <PostBuildCommand>[DOSCMD][cartConvPath] -t normal -i [ProjectDir]\[prg] -o [ProjectDir]\[prg].crt</PostBuildCommand>
+            <PostBuildCommand>[DOSCMD][cartConvPath] -i [ProjectDir]\[prg].crt -o [ProjectDir]\[prg].bin</PostBuildCommand>
         </PostBuildCommands>
     </BuildEvents>
     <BuildList>
