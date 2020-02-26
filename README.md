@@ -44,6 +44,8 @@ and modified it to work from a cartridge. The code (without
 Basic loader) is just
 copy-pasted between coldstart-warmstart and 8K padding
 sections, and needed no other modifications, luckily. I converted the compiled .prg file first to .crt, and then to .bin, using Vice's cartconv tool. The .bin file goes to the EEPROM.
+To use the post build to convert prg to crt and bin, one needs to define `cartConvPath` custom post build variable in CBM Prg Studio 
+which should point to Vice cartconv.exe. 
 
 ## What next?
 ### 16kB ROMs & Cartridges
