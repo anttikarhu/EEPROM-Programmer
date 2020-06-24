@@ -49,7 +49,7 @@ which should point to Vice cartconv.exe.
 
 ## What next?
 ### 16kB ROMs & Cartridges
-I will add support for 16kB cartridges (by using 28C256 which is 32kB, but 28 series 16kB rom is apparently not available). Still, keeping the PCB simple, and not adding any configurations or excess parts - great PCBs of such kind exist already. An untested version of 16kB PCB is already included.
+I will add support for 16kB cartridges (by using 28C256 which is 32kB, but 28 series 16kB rom is apparently not available). Still, keeping the PCB simple, and not adding any configurations or excess parts - great PCBs of such kind exist already. Alas, when I tried the software with 28C256, writing or reading does not work properly. Needs inspecting, maybe 28C256 is more strict with timing? Or something totally different. A tested version of 16kB PCB is already included thou!
 
 ### Data verify
 It would be cool to add verification after writing the data to ROM.
